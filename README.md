@@ -1,99 +1,106 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Slack Agent using Agentica
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project implements a Slack Agent powered by **Agentica** and **OpenAI's GPT model**. The agent listens for messages in Slack that mention the app and responds automatically. It processes incoming interactivity events from Slack, extracts conversation history, and generates intelligent replies using GPT. This solution is ideal for automating responses and engaging in dynamic conversations on Slack.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Automatic Response to Mentions:** The agent listens for `app_mention` events and responds only when explicitly mentioned.
+- **Conversation History Integration:** It gathers previous thread messages to build context and provide coherent replies.
+- **GPT-Powered Replies:** Leveraging OpenAI's GPT model, the agent generates natural language responses.
+- **Thread Locking:** Ensures that concurrent messages in the same thread are processed sequentially.
+- **Type Safety:** Uses `typia` for enhanced type safety and reliable code execution.
+- **Secure Credential Management:** Utilizes `dotenv` to securely manage sensitive API keys and tokens.
 
-## Project setup
+## Installation
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/slack-agent.git
+   cd slack-agent
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+   This project depends on:
+
+   - `@agentica/core`
+   - `@wrtnlabs/connector-slack`
+   - `dotenv`
+   - `openai`
+   - `typia`
+   - Other NestJS dependencies
+
+## Setup
+
+1. **Configure Environment Variables**
+
+   Create a `.env` file in the project root with the following variables:
+
+   ```env
+   OPENAI_API_KEY=your-openai-api-key
+   SLACK_ACCESS_TOKEN=your-slack-secret-key
+   ```
+
+2. **Slack API Configuration**
+
+   - Go to the [Slack API: Applications](https://api.slack.com/apps) page and create a new Slack App.
+   - Configure the necessary scopes for your app. The recommended scopes to use all functions are:
+     - `channels:read`
+     - `channels:history`
+     - `users.profile:read`
+     - `im:read`
+     - `groups:read`
+     - `chat:write`
+     - `users:read`
+     - `usergroups:read`
+     - `files:read`
+     - `team:read`
+   - Install the app to your Slack workspace and note the **Secret Key** (which you will reference as `SLACK_ACCESS_TOKEN`).
+
+## Running the Service
+
+Start the application using your preferred method. For example, if you're using NestJS:
 
 ```bash
-$ npm install
+npm run start
 ```
 
-## Compile and run the project
+The application will listen for interactivity events from Slack. When your app is mentioned in a Slack message, it will generate a reply based on the conversation context and send the response back to the thread.
 
-```bash
-# development
-$ npm run start
+## How It Works
 
-# watch mode
-$ npm run start:dev
+1. **Event Handling:**  
+   The agent receives interactivity events from Slack. It specifically handles URL verification and `app_mention` events.
 
-# production mode
-$ npm run start:prod
-```
+2. **Processing Messages:**  
+   For an `app_mention` event, the agent checks that:
 
-## Run tests
+   - The bot is mentioned in the message.
+   - The message is not from the bot itself.
+   - The thread is not already being processed.
 
-```bash
-# unit tests
-$ npm run test
+3. **Conversation Context:**  
+   It retrieves the conversation history from the thread, maps the replies into a format that Agentica can use, and generates a coherent reply with OpenAI's GPT model.
 
-# e2e tests
-$ npm run test:e2e
+4. **Replying:**  
+   Finally, the agent sends the generated reply back to the Slack thread.
 
-# test coverage
-$ npm run test:cov
-```
+## Security Note
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Warning:**  
+This code is provided for demonstration purposes only. Using automated file or message operations can be risky in a production environment. **Do not use this code in production without proper security measures.** Always ensure that your credentials are secured and that your app is thoroughly tested before deployment.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+[MIT License](LICENSE)
+
+---
+
+Feel free to open issues or contribute to the project if you encounter any bugs or have feature requests. Enjoy automating your Slack interactions with Agentica!
