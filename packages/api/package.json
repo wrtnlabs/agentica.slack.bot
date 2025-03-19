@@ -1,0 +1,36 @@
+{
+  "name": "agentica.slack.agent",
+  "version": "1.0.1",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "npm run build:sdk && npm run compile",
+    "build:sdk": "rimraf ../../src/api/functional && cd ../.. && npx nestia sdk && cd packages/api",
+    "compile": "rimraf lib && tsc",
+    "deploy": "npm run build && npm publish",
+    "prepare": "ts-patch install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wrtnlabs/agentica.slack.agent"
+  },
+  "author": "kakasoo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wrtnlabs/agentica.slack.agent/issues"
+  },
+  "files": [
+    "lib",
+    "package.json",
+    "README.md"
+  ],
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.2"
+  },
+  "dependencies": {
+    "@nestia/fetcher": "^5.0.0",
+    "typia": "^8.0.3"
+  }
+}
