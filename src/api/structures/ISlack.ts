@@ -4,7 +4,7 @@ export namespace ISlack {
    */
   export type IInteractivityInput =
     | { type: 'url_verification'; challenge: string }
-    | { type: 'app_mention'; event: ISlack.Event };
+    | { type: 'event_callback'; event: ISlack.Event };
 
   /**
    * Represents an event received from Slack.
