@@ -20,7 +20,7 @@ export class AppController {
     private readonly appService: AppService,
     private readonly configService: ConfigService,
   ) {
-    this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.openai = new OpenAI({ apiKey: this.configService.get<string>('OPENAI_API_KEY') });
     const slackAccessToken = this.configService.get<string>('SLACK_ACCESS_TOKEN')!;
     this.slackService = new SlackService({ secretKey: slackAccessToken });
   }
@@ -97,13 +97,13 @@ export class AppController {
               Pick<GithubService, 'getReadmeFile' | 'fetchRepositoryIssues' | 'getIssueDetail' | 'getIssueComments'>,
               'chatgpt'
             >(),
-            execute: new GithubService({ secret: process.env.GITHUB_ACCESS_TOKEN! }),
+            execute: new GithubService({ secret: this.configService.get<string>('GITHUB_ACCESS_TOKEN')! }),
           },
           {
             name: 'Kakao-map Connector for Organization',
             protocol: 'class',
             application: typia.llm.application<KakaoMapService, 'chatgpt'>(),
-            execute: new KakaoMapService({ clientId: process.env.KAKAO_CLIENT_ID! }),
+            execute: new KakaoMapService({ clientId: this.configService.get<string>('KAKAO_CLIENT_ID')! }),
           },
         ],
         config: {
