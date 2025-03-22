@@ -1,5 +1,5 @@
 import { Agentica } from '@agentica/core';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GithubService } from '@wrtnlabs/connector-github';
 import { KakaoMapService } from '@wrtnlabs/connector-kakao-map';
@@ -113,7 +113,7 @@ export class AppController {
                 'You are a helpful assistant.',
                 'Use the supplied tools to assist the user.',
                 '',
-                `You are ${botInfo.user.name}, the assistant for the WrtnLabs team.`, // THIS IS IMPORTANT!
+                `You are ${botInfo.user.name}, the assistant for team.`, // THIS IS IMPORTANT!
                 'This conversation is taking place in Slack.',
                 'You respond when mentioned via app_mention.',
                 'The user in this conversation has the following information:',
@@ -140,10 +140,5 @@ export class AppController {
       // Release the lock after a short delay
       setTimeout(() => this.threadLock.set(event.thread_ts, false), 1000);
     }
-  }
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
   }
 }
