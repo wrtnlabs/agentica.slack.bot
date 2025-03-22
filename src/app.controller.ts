@@ -1,5 +1,6 @@
 import { Agentica } from '@agentica/core';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GithubService } from '@wrtnlabs/connector-github';
 import { KakaoMapService } from '@wrtnlabs/connector-kakao-map';
@@ -7,7 +8,6 @@ import { SlackService } from '@wrtnlabs/connector-slack';
 import OpenAI from 'openai';
 import typia from 'typia';
 import { ISlack } from './api/structures/ISlack';
-import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
@@ -17,8 +17,8 @@ export class AppController {
   private readonly threadLock: Map<string, boolean> = new Map();
 
   constructor(
-    private readonly appService: AppService,
     private readonly configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.openai = new OpenAI({ apiKey: this.configService.get<string>('OPENAI_API_KEY') });
     const slackAccessToken = this.configService.get<string>('SLACK_ACCESS_TOKEN')!;
@@ -37,6 +37,14 @@ export class AppController {
     // Only process app_mention events
     if (event.type !== 'app_mention') {
       return;
+    }
+
+    const duplicatedEvent = await this.cacheManager.get<ISlack.Event>(body.event.ts);
+    if (duplicatedEvent) {
+      // Prevent overlapping event IDs
+      return;
+    } else {
+      await this.cacheManager.set<ISlack.Event>(body.event.ts, body.event, 60000);
     }
 
     // Retrieve bot information and its user ID
